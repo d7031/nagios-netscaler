@@ -4,7 +4,7 @@
 # File name: check_netscaler_crl_expiration.pl
 # Author : Tom Geissler	<Tom.Geissler@bertelsmann.de>
 #			<Tom@d7031.de>
-# Date : 22.09.2014
+# Date : 23.09.2014
 # =========================== LICENSE =====================================
 #
 # This program is free software; you can redistribute it and/or modify
@@ -33,7 +33,11 @@
 # Warning = CRL lifetime expire soon (default 3 days)
 # Critical = CRL lifetime expire VERY soon (default 1 days)
 #
+# add a readonly user in your netscaler
+#
 # This script is tested with Netscaler 9.3 and 10.1
+#
+# This plugin requires Net:OpenSSH (libnet-openssh-perl under debian)
 #
 # ========================================================================
 
@@ -90,14 +94,12 @@ my $ssh = Net::OpenSSH->new("$o_loginname:$o_password\@$o_host:$o_port");
 	@updateresult = grep /$lastupdate/, @crltime;
 	if (scalar($updateresult[0]) =~ /Successful/) {
 		$lastupdate = substr $updateresult[0], -25,25;        
-		#print "$lastupdate";
 	}
 
 	@expireresult = grep /$daystoexpire/, @crltime;
 	if (scalar($expireresult[0]) =~ /Valid/) {
 		$daysleft = substr $expireresult[0], -3,3;
 		$daysleft =~ s/^\s+|\s+$//g;
-		#print "$daysleft";
 	}
 	
 	if($daysleft > $o_warning) {
@@ -109,10 +111,10 @@ my $ssh = Net::OpenSSH->new("$o_loginname:$o_password\@$o_host:$o_port");
                 if (($daysleft > $o_critical) && ($daysleft <= $o_warning)) {
                         $state = "WARNING";
 			$exitstate = 1;
-                	$return_string = $state.", CRL expires SOON: ".$daysleft." days, Last update: ".$lastupdate;
+                	$return_string = $state.", CRL expire SOON: ".$daysleft." days, Last update: ".$lastupdate;
                 } else {
                         $state = "CRITICAL";
-                	$return_string = $state.", CRL expires VERY SOON: ".$daysleft." days, Last update: ".$lastupdate;
+                	$return_string = $state.", CRL expire VERY SOON: ".$daysleft." days, Last update: ".$lastupdate;
 			$exitstate = 2;
                 }
         }
