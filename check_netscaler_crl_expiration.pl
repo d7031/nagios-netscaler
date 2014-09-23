@@ -1,5 +1,7 @@
 #!/usr/bin/perl -w
 #
+# nagios: -epn
+#
 # =========================== SUMMARY =====================================
 # File name: check_netscaler_crl_expiration.pl
 # Author : Tom Geissler	<Tom.Geissler@bertelsmann.de>
@@ -90,7 +92,7 @@ my $ssh = Net::OpenSSH->new("$o_loginname:$o_password\@$o_host:$o_port");
 	my @crltime = $ssh->capture({timeout => $o_timeout},"show crl $o_ca_name\n");
 		$ssh->error and
 		die "remote crl command failed: " . $ssh->error;
-
+	
 	@updateresult = grep /$lastupdate/, @crltime;
 	if (scalar($updateresult[0]) =~ /Successful/) {
 		$lastupdate = substr $updateresult[0], -25,25;        
